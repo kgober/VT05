@@ -603,13 +603,13 @@ namespace Emulator
             // called by main UI thread via KeyDown() or system menu
             public void LowerBrightness()
             {
-                mDisplay.ChangeBrightness(-1);
+                mDisplay.ChangeBrightness(-5);
             }
 
             // called by main UI thread via KeyDown() or system menu
             public void RaiseBrightness()
             {
-                mDisplay.ChangeBrightness(1);
+                mDisplay.ChangeBrightness(5);
             }
 
             // called by worker thread
@@ -768,6 +768,7 @@ namespace Emulator
                 private Int32 mX, mY;               // cursor position
                 private Timer mCursorTimer;         // cursor blink timer
                 private Boolean mCursorVisible;     // whether cursor is currently visible
+                private Int32 mBrightness;          // brightness (0-100)
                 private UInt32 mOffColor;           // pixel 'off' color
                 private UInt32 mOnColor;            // pixel 'on' color
 
@@ -783,8 +784,9 @@ namespace Emulator
                     mChars = new Byte[COLS * ROWS];
                     mCursorTimer = new Timer(CursorTimer_Callback, this, 0, 133);
                     mCursorVisible = false;
-                    mOffColor = Color(0, 0, 0);
-                    mOnColor = Color(216, 220, 255);
+                    mBrightness = 85;   // 85% is the maximum brightness without blue being oversaturated
+                    mOffColor = Color(0);
+                    mOnColor = Color(mBrightness);
                 }
 
                 public Bitmap Bitmap
@@ -899,25 +901,43 @@ namespace Emulator
                 // this needs to be rewritten to preserve the desired tint even when brightening from zero
                 public void ChangeBrightness(Int32 delta)
                 {
-                    Int32 r = (Byte)((mOnColor >> 16) & 0xFF);
-                    Int32 g = (Byte)((mOnColor >> 8) & 0xFF);
-                    Int32 b = (Byte)(mOnColor & 0xFF);
-                    r += delta;
-                    if (r < 0) r = 0; else if (r > 255) r = 255;
-                    if (g < 0) g = 0; else if (g > 255) g = 255;
-                    if (b < 0) b = 0; else if (b > 255) b = 255;
+                    mBrightness += delta;
+                    if (mBrightness < 5) mBrightness = 5;
+                    else if (mBrightness > 100) mBrightness = 100;
                     UInt32 old = mOnColor;
-                    mOnColor = Color((Byte)r, (Byte)g, (Byte)b);
+                    mOnColor = Color(mBrightness);
                     ReplacePixels(old, mOnColor);
                 }
 
-                private UInt32 Color(Byte red, Byte green, Byte blue)
+                // P4 phosphor colors (CIE chromaticity coordinates: x=0.275 y=0.290)
+                private UInt32 Color(Int32 brightness)
                 {
-                    UInt32 c = 0xFF;
-                    c = (c << 8) | red;
-                    c = (c << 8) | green;
-                    c = (c << 8) | blue;
-                    return c;
+                    if ((brightness < 0) || (brightness > 100)) throw new ArgumentOutOfRangeException("brightness");
+                    switch (brightness)
+                    {
+                        case 100: return 0xFFE6FFFF;
+                        case 95: return 0xFFDAF5FF;
+                        case 90: return 0xFFCFE8FF;
+                        case 85: return 0xFFC4DCFF;
+                        case 80: return 0xFFB8CFF1;
+                        case 75: return 0xFFADC2E2;
+                        case 70: return 0xFFA2B6D3;
+                        case 65: return 0xFF96A9C5;
+                        case 60: return 0xFF8A9CB6;
+                        case 55: return 0xFF7F8FA7;
+                        case 50: return 0xFF738298;
+                        case 45: return 0xFF677488;
+                        case 40: return 0xFF5B6779;
+                        case 35: return 0xFF4F5A69;
+                        case 30: return 0xFF434C5A;
+                        case 25: return 0xFF363E4A;
+                        case 20: return 0xFF2A3039;
+                        case 15: return 0xFF1D2229;
+                        case 10: return 0xFF0f1318;
+                        case 5: return 0xFF040506;
+                        case 0: return 0xFF000000;
+                        default: return 0;
+                    }
                 }
 
                 private void ReplacePixels(UInt32 oldColor, UInt32 newColor)
