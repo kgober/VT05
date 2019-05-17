@@ -121,6 +121,12 @@ namespace Emulator
             set { checkBox3.Checked = value; }
         }
 
+        public Boolean OptMarginBell
+        {
+            get { return checkBox4.Checked; }
+            set { checkBox4.Checked = value; }
+        }
+
         private void SettingsDialog_Load(object sender, EventArgs e)
         {
             mOK = false;

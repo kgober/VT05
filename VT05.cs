@@ -113,6 +113,20 @@ namespace Emulator
                                             dlgSettings.OptHalfASCII = false;
                                             arg = arg.Substring(2);
                                         }
+                                        else if (arg.StartsWith("m+", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            mOptMarginBell = true;
+                                            if (dlgSettings == null) dlgSettings = new SettingsDialog();
+                                            dlgSettings.OptMarginBell = true;
+                                            arg = arg.Substring(2);
+                                        }
+                                        else if (arg.StartsWith("m-", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            mOptMarginBell = false;
+                                            if (dlgSettings == null) dlgSettings = new SettingsDialog();
+                                            dlgSettings.OptMarginBell = false;
+                                            arg = arg.Substring(2);
+                                        }
                                     }
                                     break;
                                 case 'r':
@@ -201,6 +215,7 @@ namespace Emulator
             private Boolean mOptHalfDuplex;         // transmitter is wired directly to receiver
             private Boolean mOptHalfASCII;          // keyboard sends 96 characters rather than 128
             private Boolean mOptBackspaceIsDEL;     // Backspace key sends DEL rather than BS
+            private Boolean mOptMarginBell;         // margin bell enabled
             private SettingsDialog dlgSettings;
             private ConnectionDialog dlgConnection;
 
@@ -208,6 +223,7 @@ namespace Emulator
             {
                 mKeys = new List<VK>();
                 mCaps = Console.CapsLock;
+                mOptMarginBell = true;
             }
 
             public override Boolean KeyEvent(Int32 msgId, IntPtr wParam, IntPtr lParam)
@@ -528,6 +544,7 @@ namespace Emulator
                 if (!dlgSettings.OK) return;
 
                 mOptAutoRepeat = dlgSettings.OptAutoRepeat;
+                mOptMarginBell = dlgSettings.OptMarginBell;
                 mOptHalfDuplex = dlgSettings.OptHalfDuplex;
                 mOptHalfASCII = dlgSettings.OptHalfASCII;
                 mOptBackspaceIsDEL = dlgSettings.OptBackspaceSendsDEL;
@@ -902,7 +919,7 @@ namespace Emulator
                     if (x < 0) x = 0; else if (x >= COLS) x = COLS - 1;
                     Int32 y = mY + dy;
                     if (y < 0) y = 0; else if (y >= ROWS) y = ROWS - 1;
-                    if ((x >= 64) && (mX < 64)) Beep();  // margin beep is triggered when cursor enters column 65-72 range
+                    if ((x >= 64) && (mX < 64) && (mVT05.mOptMarginBell)) Beep();  // margin beep is triggered when cursor enters column 65-72 range
                     if ((x != mX) || (y != mY)) MoveCursorAbs(x, y);
                 }
 
@@ -972,9 +989,9 @@ namespace Emulator
                     p += BufWrite(buf, p, 1470); // 735 samples follow at 2 bytes per sample
                     for (Int32 i = 0; i < 13; i++)
                     {
-                        for (Int32 j = 0; j < 28; j++) p += BufWrite(buf, p, (Int16)750);
-                        for (Int32 j = 0; j < 28; j++) p += BufWrite(buf, p, (Int16)(-750));
-                        if ((i % 2) == 0) p += BufWrite(buf, p, (Int16)(-750));
+                        for (Int32 j = 0; j < 28; j++) p += BufWrite(buf, p, (Int16)400);
+                        for (Int32 j = 0; j < 28; j++) p += BufWrite(buf, p, (Int16)(-400));
+                        if ((i % 2) == 0) p += BufWrite(buf, p, (Int16)(-400));
                     }
                     BufWrite(buf, 4, p - 8);
                     return new SoundPlayer(new System.IO.MemoryStream(buf));
