@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Media;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace Emulator
@@ -37,19 +38,19 @@ namespace Emulator
         // VT05 Alphanumeric Display Terminal Maintenance Manual, Volume 1 [DEC-00-H4BD-D]
 
         // Future Improvements / To Do
-        // correct cursor blink rate (7.5Hz)
-        // margin beep
-        // correct bell sound
-        // correct parity options (no parity (mark/0) / with parity (even))
-        // correct keyboard options (full ASCII / half ASCII)
+        // verify bell code thread safety between worker thread and cursor timer thread)
+        // correct power-on sequencing (including bell at correct time)
+        // verify whether bell starts sounding when cursor turns on, or when cursor turns off
         // A/B models (300 baud max / 2400 baud max)
         // correct padding behavior (consult schematics to see what happens for nonzero padding after CAD Y)
         // correct padding time (17ms assumed - "slightly greater than one full cycle of the AC line")
         // integrate padding timeout with UART receive clock (avoid padding misapplication when receiving 'catch up' bursts of chars)
-        // full/half-duplex switch
         // contrast control
         // shift lock key
         // correct typeahead behavior (i.e. none)
+        // add command line option for serial connection
+        // allow re-use of recent network destinations
+        // store previous serial port configuration
 
 
         // Terminal-MainWindow Interface [Main UI Thread]
@@ -61,6 +62,7 @@ namespace Emulator
                 InitKeyboard();
                 InitDisplay();
                 InitIO();
+                PowerOnComplete();
                 ParseArgs(Program.Args);
             }
 
@@ -228,7 +230,9 @@ namespace Emulator
                 Char c;
                 VK k = MapKey(wParam, lParam);
                 Int32 l = lParam.ToInt32();
-                //Log.WriteLine("KeyDown: wParam={0:X8} lParam={1:X8} vk={2} (0x{3:X2}) num={4}", (Int32)wParam, l, k.ToString(), (Int32)k, Console.NumberLock);
+#if DEBUG
+                Log.WriteLine("KeyDown: wParam={0:X8} lParam={1:X8} vk={2} (0x{3:X2}) num={4}", (Int32)wParam, l, k.ToString(), (Int32)k, Console.NumberLock);
+#endif
 
                 // auto-repeat always enabled for F11 & F12
                 if (k == VK.F11) { LowerBrightness(); return true; }
@@ -415,7 +419,9 @@ namespace Emulator
             {
                 VK k = MapKey(wParam, lParam);
                 Int32 l = (Int32)(lParam.ToInt64() & 0x00000000FFFFFFFF);
-                //Log.WriteLine("KeyUp: wParam={0:X8} lParam={1:X8} vk={2} (0x{3:X2}) num={4}", (Int32)wParam, l, k.ToString(), (Int32)k, Console.NumberLock);
+#if DEBUG
+                Log.WriteLine("KeyUp: wParam={0:X8} lParam={1:X8} vk={2} (0x{3:X2}) num={4}", (Int32)wParam, l, k.ToString(), (Int32)k, Console.NumberLock);
+#endif
                 if (mKeys.Contains(k)) mKeys.Remove(k);
 
                 if ((k >= VK.A) && (k <= VK.Z)) return true;
@@ -587,6 +593,12 @@ namespace Emulator
                 mPadTime = DateTime.MinValue;
             }
 
+            // called by main UI thread via constructor
+            private void PowerOnComplete()
+            {
+                mDisplay.PowerOnBeep();
+            }
+
             // called by main UI thread
             public override Bitmap Bitmap
             {
@@ -615,10 +627,14 @@ namespace Emulator
             // called by worker thread
             private void Recv(Byte c)
             {
+#if DEBUG
                 Log.WriteLine("Recv: {0} ({1:D0}/0x{1:X2})", (Char)c, c);
+#endif
                 if (DateTime.Now < mPadTime)
                 {
+#if DEBUG
                     Log.WriteLine("Recv: Padding char dropped");
+#endif
                     if (mZeroPad && (c != 0))
                     {
                         // CAD malfunction here, but unclear what
@@ -686,7 +702,7 @@ namespace Emulator
                             mDisplay.MoveCursorRel(8 - (mDisplay.CursorX % 8), 0);
                         return;
                     case '\a': // BEL - Ring the Bell
-                        SystemSounds.Beep.Play();
+                        mDisplay.Beep();
                         return;
                     case '\x0E': // CAD - Direct Cursor Addressing
                         mCAD = 1;
@@ -752,6 +768,12 @@ namespace Emulator
             // top raster line is blank, next 7 are for character, next is blank, last is cursor line
             // To simulate the raster, dots are drawn as 2x2 pixels, with a 1 pixel gap below
             // P4 phosphor (white)
+
+            // terminal bell is also handled here, due to relationship between bell and cursor logic
+            // BELL I flip-flop activates bell on positive edge of CHAR 65 BELL (via clock input) or
+            // on BELL and STROBE both being high (via preset input).  BELL II flip-flop ensures bell
+            // sounds for an entire on/off cycle of the cursor.
+
             private class Display
             {
                 public const Int32 ROWS = 20;
@@ -771,6 +793,9 @@ namespace Emulator
                 private Int32 mBrightness;          // brightness (0-100)
                 private UInt32 mOffColor;           // pixel 'off' color
                 private UInt32 mOnColor;            // pixel 'on' color
+                private SoundPlayer mBell;          // bell sound
+                private volatile Boolean mBeepReq;  // whether a beep has been requested
+                private Boolean mBeeping;           // whether a beep is currently sounding
 
                 public Display(VT05 parent)
                 {
@@ -782,11 +807,13 @@ namespace Emulator
                     mBitmap = new Bitmap(x, y, x * sizeof(Int32), PixelFormat.Format32bppPArgb, mPixMapHandle.AddrOfPinnedObject());
                     mBitmapDirty = true;
                     mChars = new Byte[COLS * ROWS];
-                    mCursorTimer = new Timer(CursorTimer_Callback, this, 0, 133);
-                    mCursorVisible = false;
                     mBrightness = 85;   // 85% is the maximum brightness without blue being oversaturated
                     mOffColor = Color(0);
                     mOnColor = Color(mBrightness);
+                    mBell = BellSound();
+                    mBell.Load();
+                    mCursorVisible = false;
+                    mCursorTimer = new Timer(CursorTimer_Callback, this, 0, 133); // 7.5 transitions per second (3.75 Hz blink rate)
                 }
 
                 public Bitmap Bitmap
@@ -875,6 +902,7 @@ namespace Emulator
                     if (x < 0) x = 0; else if (x >= COLS) x = COLS - 1;
                     Int32 y = mY + dy;
                     if (y < 0) y = 0; else if (y >= ROWS) y = ROWS - 1;
+                    if ((x >= 64) && (mX < 64)) Beep();  // margin beep is triggered when cursor enters column 65-72 range
                     if ((x != mX) || (y != mY)) MoveCursorAbs(x, y);
                 }
 
@@ -907,6 +935,80 @@ namespace Emulator
                     UInt32 old = mOnColor;
                     mOnColor = Color(mBrightness);
                     ReplacePixels(old, mOnColor);
+                }
+
+                public void PowerOnBeep()
+                {
+                    while (!mBell.IsLoadCompleted) Thread.Sleep(0);
+                    mBeepReq = true;
+                    mBell.PlayLooping();
+                    mBeeping = true;
+                }
+
+                public void Beep()
+                {
+                    while (!mBell.IsLoadCompleted) Thread.Sleep(0);
+                    mBeepReq = true;
+                }
+
+                // Construct a WAV file for a 780 Hz square wave recorded at a sample rate of 44.1 kHz, 16 bits per sample, mono.
+                // 44100 Hz / 780 Hz = 56.538 samples per wave period, or exactly 735 samples over 13 wave periods
+                private SoundPlayer BellSound()
+                {
+                    Byte[] buf = new Byte[2048]; // only 1514 bytes actually required
+                    Int32 p = 0;
+                    p += BufWrite(buf, p, "RIFF");
+                    p += 4;
+                    p += BufWrite(buf, p, "WAVE");
+                    p += BufWrite(buf, p, "fmt ");
+                    p += BufWrite(buf, p, 16); // 16 bytes follow
+                    p += BufWrite(buf, p, (Int16)1); // 1 = PCM
+                    p += BufWrite(buf, p, (Int16)1); // 1 = Mono
+                    p += BufWrite(buf, p, 44100); // Sample Rate
+                    p += BufWrite(buf, p, 88200); // Byte Rate
+                    p += BufWrite(buf, p, (Int16)2); // bytes per sample period
+                    p += BufWrite(buf, p, (Int16)16); // bits per sample
+                    p += BufWrite(buf, p, "data");
+                    p += BufWrite(buf, p, 1470); // 735 samples follow at 2 bytes per sample
+                    for (Int32 i = 0; i < 13; i++)
+                    {
+                        for (Int32 j = 0; j < 28; j++) p += BufWrite(buf, p, (Int16)750);
+                        for (Int32 j = 0; j < 28; j++) p += BufWrite(buf, p, (Int16)(-750));
+                        if ((i % 2) == 0) p += BufWrite(buf, p, (Int16)(-750));
+                    }
+                    BufWrite(buf, 4, p - 8);
+                    return new SoundPlayer(new System.IO.MemoryStream(buf));
+                }
+
+                private Int32 BufWrite(Byte[] buffer, Int32 index, String data)
+                {
+                    return Encoding.ASCII.GetBytes(data, 0, data.Length, buffer, index);
+                }
+
+                private Int32 BufWrite(Byte[] buffer, Int32 index, Byte data)
+                {
+                    buffer[index] = data;
+                    return 1;
+                }
+
+                private Int32 BufWrite(Byte[] buffer, Int32 index, Int16 data)
+                {
+                    for (Int32 i = 0; i < 2; i++)
+                    {
+                        buffer[index++] = (Byte)(data & 0x00FF);
+                        data >>= 8;
+                    }
+                    return 2;
+                }
+
+                private Int32 BufWrite(Byte[] buffer, Int32 index, Int32 data)
+                {
+                    for (Int32 i = 0; i < 4; i++)
+                    {
+                        buffer[index++] = (Byte)(data & 0x000000FF);
+                        data >>= 8;
+                    }
+                    return 4;
                 }
 
                 // P4 phosphor colors (CIE chromaticity coordinates: x=0.275 y=0.290)
@@ -957,6 +1059,27 @@ namespace Emulator
                         mCursorVisible = !mCursorVisible;
                         DrawCursor(mCursorVisible ? mOnColor : mOffColor);
                         mBitmapDirty = true;
+                    }
+
+                    if (mCursorVisible)
+                    {
+                        lock (mBell)
+                        {
+                            if (mBeepReq)
+                            {
+                                mBeepReq = false;
+                                if (!mBeeping)
+                                {
+                                    mBeeping = true;
+                                    mBell.PlayLooping();
+                                }
+                            }
+                            else if (mBeeping)
+                            {
+                                mBeeping = false;
+                                mBell.Stop();
+                            }
+                        }
                     }
                 }
 
@@ -1819,7 +1942,9 @@ namespace Emulator
 
                 private void IOEvent(Object sender, IOEventArgs e)
                 {
+#if DEBUG
                     Log.WriteLine("IOEvent: {0} {1} (0x{2:X2})", e.Type, (Char)e.Value, e.Value);
+#endif
                     switch (e.Type)
                     {
                         case IOEventType.Data:
@@ -1863,7 +1988,9 @@ namespace Emulator
                     {
                         TimeSpan t = DateTime.UtcNow.Subtract(mSendClock);
                         Int32 due = (Int32)(t.TotalSeconds * mSendRate + 0.5) - mSendCount;
-                        //Log.WriteLine("SendTimer_Callback: due={0:D0} ct={1:D0}", due, mSendQueue.Count);
+#if DEBUG
+                        Log.WriteLine("SendTimer_Callback: due={0:D0} ct={1:D0}", due, mSendQueue.Count);
+#endif
                         if (due <= 0) return;
                         while ((due-- > 0) && (mSendQueue.Count != 0))
                         {
@@ -1889,7 +2016,9 @@ namespace Emulator
                     {
                         TimeSpan t = DateTime.UtcNow.Subtract(mRecvClock);
                         Int32 due = (Int32)(t.TotalSeconds * mRecvRate + 0.5) - mRecvCount;
+#if DEBUG
                         Log.WriteLine("RecvTimer_Callback: due={0:D0} ct={1:D0}", due, mRecvQueue.Count);
+#endif
                         if (due <= 0) return;
                         while ((due-- > 0) && (mRecvQueue.Count != 0))
                         {
