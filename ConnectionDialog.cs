@@ -34,7 +34,7 @@ namespace Emulator
 
     public partial class ConnectionDialog : Form
     {
-        private Boolean mOK;
+        private Boolean mOK = true;
         private Dictionary<String, SerialPort> mSerialPorts = new Dictionary<String, SerialPort>(StringComparer.OrdinalIgnoreCase);
 
         public ConnectionDialog()

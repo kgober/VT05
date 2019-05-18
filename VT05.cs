@@ -133,17 +133,17 @@ namespace Emulator
                                 case 'R':
                                     arg = arg.Substring(2);
                                     if ((arg.Length == 0) && (ap < args.Length)) arg = args[ap++];
-                                    mUART.IO = ConnectRawTCP(arg);
                                     if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                                     dlgConnection.Set(typeof(IO.RawTCP), arg);
+                                    mUART.IO = ConnectRawTCP(dlgConnection.Options);
                                     break;
                                 case 't':
                                 case 'T':
                                     arg = arg.Substring(2);
                                     if ((arg.Length == 0) && (ap < args.Length)) arg = args[ap++];
-                                    mUART.IO = ConnectTelnet(arg);
                                     if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                                     dlgConnection.Set(typeof(IO.Telnet), arg);
+                                    mUART.IO = ConnectTelnet(dlgConnection.Options);
                                     break;
                             }
                         }
