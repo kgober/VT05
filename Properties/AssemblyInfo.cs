@@ -50,11 +50,12 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.4")]
-[assembly: AssemblyFileVersion("1.0.0.4")]
+[assembly: AssemblyVersion("1.0.0.5")]
+[assembly: AssemblyFileVersion("1.0.0.5")]
 // 1.0.0.0 - initial release (based on VT52 1.0.0.4)
 // 1.0.0.1 - improve screen color to more closely match P4 phosphor color
 // 1.0.0.2 - more accurate reproduction of terminal beep
 // 1.0.0.3 - add setting allowing margin bell to be disabled
 //         - slightly reduce bell volume
 // 1.0.0.4 - improve handling of failed connections
+// 1.0.0.5 - don't close connection if it's not actually changing

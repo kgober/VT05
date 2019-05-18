@@ -1801,6 +1801,7 @@ namespace Emulator
                     }
                     set
                     {
+                        if (mIO == value) return;
                         if (mIO != null) mIO.Close();
                         mIO = value;
                         if (mIO != null) mIO.IOEvent += IOEvent;
