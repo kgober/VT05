@@ -133,9 +133,7 @@ namespace Emulator
                                 case 'R':
                                     arg = arg.Substring(2);
                                     if ((arg.Length == 0) && (ap < args.Length)) arg = args[ap++];
-                                    mUART.IO = new IO.RawTCP(arg);
-                                    mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
-                                    mCaptionDirty = true;
+                                    mUART.IO = ConnectRawTCP(arg);
                                     if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                                     dlgConnection.Set(typeof(IO.RawTCP), arg);
                                     break;
@@ -143,9 +141,7 @@ namespace Emulator
                                 case 'T':
                                     arg = arg.Substring(2);
                                     if ((arg.Length == 0) && (ap < args.Length)) arg = args[ap++];
-                                    mUART.IO = new IO.Telnet(arg);
-                                    mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
-                                    mCaptionDirty = true;
+                                    mUART.IO = ConnectTelnet(arg);
                                     if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                                     dlgConnection.Set(typeof(IO.Telnet), arg);
                                     break;
@@ -563,29 +559,105 @@ namespace Emulator
                 if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                 dlgConnection.ShowDialog();
                 if (!dlgConnection.OK) return;
-                if ((dlgConnection.IOAdapter == typeof(IO.Loopback)) && !(mUART.IO is IO.Loopback))
+                if (dlgConnection.IOAdapter == typeof(IO.Loopback))
                 {
-                    mUART.IO = new IO.Loopback();
-                    mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
-                    mCaptionDirty = true;
+                    mUART.IO = ConnectLoopback(dlgConnection.Options);
                 }
-                else if ((dlgConnection.IOAdapter == typeof(IO.Serial)) && !(mUART.IO is IO.Serial))
+                else if (dlgConnection.IOAdapter == typeof(IO.Serial))
                 {
-                    mUART.IO = new IO.Serial(dlgConnection.Options);
-                    mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
-                    mCaptionDirty = true;
+                    mUART.IO = ConnectSerial(dlgConnection.Options);
                 }
-                else if ((dlgConnection.IOAdapter == typeof(IO.Telnet)) && !(mUART.IO is IO.Telnet))
+                else if (dlgConnection.IOAdapter == typeof(IO.Telnet))
                 {
-                    mUART.IO = new IO.Telnet(dlgConnection.Options);
-                    mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
-                    mCaptionDirty = true;
+                    mUART.IO = ConnectTelnet(dlgConnection.Options);
                 }
-                else if ((dlgConnection.IOAdapter == typeof(IO.RawTCP)) && !(mUART.IO is IO.RawTCP))
+                else if (dlgConnection.IOAdapter == typeof(IO.RawTCP))
                 {
-                    mUART.IO = new IO.RawTCP(dlgConnection.Options);
-                    mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
-                    mCaptionDirty = true;
+                    mUART.IO = ConnectRawTCP(dlgConnection.Options);
+                }
+            }
+
+            private IO ConnectLoopback(String options)
+            {
+                if (mUART.IO is IO.Loopback) return mUART.IO;
+                try
+                {
+                    IO X = new IO.Loopback(options);
+                    String s = String.Concat("VT05 - ", X.ConnectionString);
+                    if (String.Compare(s, mCaption) != 0)
+                    {
+                        mCaption = s;
+                        mCaptionDirty = true;
+                    }
+                    return X;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    return mUART.IO;
+                }
+            }
+
+            private IO ConnectSerial(String options)
+            {
+                if ((mUART.IO is IO.Serial) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
+                try
+                {
+                    IO X = new IO.Serial(options);
+                    String s = String.Concat("VT05 - ", X.ConnectionString);
+                    if (String.Compare(s, mCaption) != 0)
+                    {
+                        mCaption = s;
+                        mCaptionDirty = true;
+                    }
+                    return X;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    return mUART.IO;
+                }
+            }
+
+            private IO ConnectTelnet(String options)
+            {
+                if ((mUART.IO is IO.Telnet) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
+                try
+                {
+                    IO X = new IO.Telnet(options);
+                    String s = String.Concat("VT05 - ", X.ConnectionString);
+                    if (String.Compare(s, mCaption) != 0)
+                    {
+                        mCaption = s;
+                        mCaptionDirty = true;
+                    }
+                    return X;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    return mUART.IO;
+                }
+            }
+
+            private IO ConnectRawTCP(String options)
+            {
+                if ((mUART.IO is IO.RawTCP) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
+                try
+                {
+                    IO X = new IO.RawTCP(options);
+                    String s = String.Concat("VT05 - ", X.ConnectionString);
+                    if (String.Compare(s, mCaption) != 0)
+                    {
+                        mCaption = s;
+                        mCaptionDirty = true;
+                    }
+                    return X;
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    return mUART.IO;
                 }
             }
         }
@@ -786,7 +858,7 @@ namespace Emulator
             // To simulate the raster, dots are drawn as 2x2 pixels, with a 1 pixel gap below
             // P4 phosphor (white)
 
-            // terminal bell is also handled here, due to relationship between bell and cursor logic
+            // terminal bell is also handled here, due to relationship between bell and cursor logic.
             // BELL I flip-flop activates bell on positive edge of CHAR 65 BELL (via clock input) or
             // on BELL and STROBE both being high (via preset input).  BELL II flip-flop ensures bell
             // sounds for an entire on/off cycle of the cursor.
@@ -1640,7 +1712,7 @@ namespace Emulator
             private void InitIO()
             {
                 mUART = new UART(this);
-                mUART.IO = new IO.Loopback();
+                mUART.IO = new IO.Loopback(null);
                 mCaption = String.Concat("VT05 - ", mUART.IO.ConnectionString);
                 mCaptionDirty = true;
             }
@@ -1992,7 +2064,7 @@ namespace Emulator
                             break;
                         case IOEventType.Disconnect:
                             lock (mRecvQueue) mRecvQueue.Clear();
-                            IO = new IO.Loopback();
+                            IO = new IO.Loopback(null);
                             mVT05.mCaption = String.Concat("VT05 - ", IO.ConnectionString);
                             mVT05.mCaptionDirty = true;
                             break;

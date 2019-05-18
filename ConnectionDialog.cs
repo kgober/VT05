@@ -92,8 +92,8 @@ namespace Emulator
                 radioButton1.Checked = false;
                 radioButton2.Checked = false;
                 radioButton3.Checked = true;
-                radioButton4.Checked = true;
                 radioButton5.Checked = false;
+                radioButton4.Checked = true;
                 textBox1.Text = option;
             }
             else if (ioType == typeof(IO.RawTCP))
