@@ -59,3 +59,4 @@ using System.Runtime.InteropServices;
 //         - slightly reduce bell volume
 // 1.0.0.4 - improve handling of failed connections
 // 1.0.0.5 - don't close connection if it's not actually changing
+//         - add GitHub URL to About dialog

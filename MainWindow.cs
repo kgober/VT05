@@ -94,7 +94,7 @@ namespace Emulator
                             break;
                         case 99: // About VT05
                             String v = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                            MessageBox.Show(String.Concat("VT05 v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019", "About VT05"));
+                            MessageBox.Show(String.Concat("VT05 v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019\r\nhttps://github.com/kgober/VT05"), "About VT05");
                             break;
                         default:
                             base.WndProc(ref m);
