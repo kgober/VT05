@@ -50,8 +50,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.5")]
-[assembly: AssemblyFileVersion("1.0.0.5")]
+[assembly: AssemblyVersion("1.0.0.6")]
+[assembly: AssemblyFileVersion("1.0.0.6")]
 // 1.0.0.0 - initial release (based on VT52 1.0.0.4)
 // 1.0.0.1 - improve screen color to more closely match P4 phosphor color
 // 1.0.0.2 - more accurate reproduction of terminal beep
@@ -60,3 +60,4 @@ using System.Runtime.InteropServices;
 // 1.0.0.4 - improve handling of failed connections
 // 1.0.0.5 - don't close connection if it's not actually changing
 //         - add GitHub URL to About dialog
+// 1.0.0.6 - allow paste from clipboard (mouse right click)

@@ -51,6 +51,8 @@ namespace Emulator
         // add command line option for serial connection
         // allow re-use of recent network destinations
         // store previous serial port configuration
+        // log to file
+        // right click context menu? (if so, move Paste option there)
 
 
         // Terminal-MainWindow Interface [Main UI Thread]
@@ -234,6 +236,14 @@ namespace Emulator
                         return KeyUp(wParam, lParam);
                     default:
                         return false;
+                }
+            }
+
+            public override void Paste(string text)
+            {
+                foreach (Char c in text)
+                {
+                    if (c < 128) Input(c);
                 }
             }
 
