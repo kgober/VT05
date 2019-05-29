@@ -34,6 +34,7 @@ namespace Emulator
 
         public MainWindow()
         {
+            Program.Name = "VT05";
             InitializeComponent();
         }
 
@@ -47,7 +48,7 @@ namespace Emulator
             Win32.AppendMenu(hMenu, MF.STRING, (UIntPtr)6, "Connection (F6)");
             Win32.AppendMenu(hMenu, MF.STRING, (UIntPtr)11, "Brightness - (F11)");
             Win32.AppendMenu(hMenu, MF.STRING, (UIntPtr)12, "Brightness + (F12)");
-            Win32.AppendMenu(hMenu, MF.STRING, (UIntPtr)99, "About VT05");
+            Win32.AppendMenu(hMenu, MF.STRING, (UIntPtr)99, String.Concat("About ", Program.Name));
         }
 
         // hooking WndProc is needed to differentiate Enter from Keypad Enter
@@ -94,7 +95,7 @@ namespace Emulator
                             break;
                         case 99: // About VT05
                             String v = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                            MessageBox.Show(String.Concat("VT05 v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019\r\nhttps://github.com/kgober/VT05"), "About VT05");
+                            MessageBox.Show(String.Concat(Program.Name, " v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019\r\nhttps://github.com/kgober/VT05"), "About VT05");
                             break;
                         default:
                             base.WndProc(ref m);
@@ -147,16 +148,12 @@ namespace Emulator
 
         private void MainWindow_MouseDown(object sender, MouseEventArgs e)
         {
-#if DEBUG
-            Log.WriteLine("MouseDown: Button={0} XY={1:D0},{2:D0} Loc={3:D0},{4:D0}", e.Button.ToString(), e.X, e.Y, e.Location.X, e.Location.Y);
-#endif
+            Debug.WriteLine("MouseDown: Button={0} XY={1:D0},{2:D0} Loc={3:D0},{4:D0}", e.Button.ToString(), e.X, e.Y, e.Location.X, e.Location.Y);
         }
 
         private void MainWindow_MouseUp(object sender, MouseEventArgs e)
         {
-#if DEBUG
-            Log.WriteLine("MouseUp: Button={0} XY={1:D0},{2:D0} Loc={3:D0},{4:D0}", e.Button.ToString(), e.X, e.Y, e.Location.X, e.Location.Y);
-#endif
+            Debug.WriteLine("MouseUp: Button={0} XY={1:D0},{2:D0} Loc={3:D0},{4:D0}", e.Button.ToString(), e.X, e.Y, e.Location.X, e.Location.Y);
             if (e.Button == MouseButtons.Right)
             {
                 String text = Clipboard.GetText();
