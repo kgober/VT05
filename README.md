@@ -3,7 +3,7 @@ This is a VT05 terminal emulator for Windows, written in C#.
 The aim of this project is to accurately reproduce the experience of using a real
 Digital Equipment Corporation (DEC) VT05 terminal, including the look of the screen.
 
-![Screenshot](Screenshot.png)
+![Screenshot](Ref%20Man%20Screen%20Text.png)
 
 The VT05 was an early "glass teletype" terminal, and had a display size of 72 columns x 20 rows.
 It displayed upper-case only, using the "half ASCII" character set.  The keyboard was capable
