@@ -625,7 +625,7 @@ namespace Emulator
                 if (mUART.IO is IO.Loopback) return mUART.IO;
                 try
                 {
-                    IO X = new IO.Loopback(options);
+                    IO.Loopback X = new IO.Loopback(options);
                     String s = String.Concat(Program.Name, " - ", X.ConnectionString);
                     if (String.Compare(s, mCaption) != 0)
                     {
@@ -646,7 +646,7 @@ namespace Emulator
                 if ((mUART.IO is IO.Serial) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
                 try
                 {
-                    IO X = new IO.Serial(options);
+                    IO.Serial X = new IO.Serial(options);
                     String s = String.Concat(Program.Name, " - ", X.ConnectionString);
                     if (String.Compare(s, mCaption) != 0)
                     {
@@ -667,7 +667,7 @@ namespace Emulator
                 if ((mUART.IO is IO.Telnet) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
                 try
                 {
-                    IO X = new IO.Telnet(options);
+                    IO.Telnet X = new IO.Telnet(options, mUART.ReceiveSpeed, mUART.TransmitSpeed, Display.COLS, Display.ROWS, "DEC-VT05", "VT05");
                     String s = String.Concat(Program.Name, " - ", X.ConnectionString);
                     if (String.Compare(s, mCaption) != 0)
                     {
@@ -688,7 +688,7 @@ namespace Emulator
                 if ((mUART.IO is IO.RawTCP) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
                 try
                 {
-                    IO X = new IO.RawTCP(options);
+                    IO.RawTCP X = new IO.RawTCP(options);
                     String s = String.Concat(Program.Name, " - ", X.ConnectionString);
                     if (String.Compare(s, mCaption) != 0)
                     {

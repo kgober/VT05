@@ -297,13 +297,17 @@ namespace Emulator
             private Emulator.Telnet mTelnet;
             private Boolean mBreak;
 
-            public Telnet(String options)
+            public Telnet(String options, Int32 receiveBaud, Int32 transmitBaud, UInt16 termWidth, UInt16 termHeight, params String[] termTypes)
             {
                 mOptions = options;
                 String[] O = options.Split('|');
                 mDestination = O[0];
                 mConnStr = String.Concat("Telnet ", mDestination);
-                mTelnet = new Emulator.Telnet(mDestination);
+                mTelnet = new Emulator.Telnet();
+                mTelnet.SetTerminalSpeed(receiveBaud, transmitBaud);
+                mTelnet.SetWindowSize(termWidth, termHeight);
+                mTelnet.SetTerminalType(termTypes);
+                mTelnet.Connect(mDestination);
                 mTelnet.Receive += Receive;
             }
 
