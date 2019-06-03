@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Media;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -38,7 +39,7 @@ namespace Emulator
         // VT05 Alphanumeric Display Terminal Maintenance Manual, Volume 1 [DEC-00-H4BD-D]
 
         // Future Improvements / To Do
-        // verify bell code thread safety between worker thread and cursor timer thread)
+        // verify bell code thread safety between worker thread and cursor timer thread
         // correct power-on sequencing (including bell at correct time)
         // verify whether bell starts sounding when cursor turns on, or when cursor turns off
         // A/B models (300 baud max / 2400 baud max)
@@ -236,6 +237,42 @@ namespace Emulator
                         return KeyUp(wParam, lParam);
                     default:
                         return false;
+                }
+            }
+
+            // System Menu can cause state of Alt key to be lost (it could be up or down)
+            public override Boolean MenuEvent(Int32 msgId, IntPtr wParam, IntPtr lParam)
+            {
+                Debug.WriteLine("MenuEvent: msgId=0x{0:x4} wParam=0x{1:x4} lParam=0x{2:x8}", msgId, (Int32)wParam, (Int32)lParam);
+                if (msgId == 0x0112) // WM_SYSCOMMAND
+                {
+                    switch ((Int32)wParam)
+                    {
+                        case 5: // Settings (F5)
+                            AskSettings();
+                            return true;
+                        case 6: // Connection (F6)
+                            AskConnection();
+                            return true;
+                        case 11: // Brightness - (F11)
+                            LowerBrightness();
+                            return true;
+                        case 12: // Brightness + (F12)
+                            RaiseBrightness();
+                            return true;
+                        case 99: // About
+                            String v = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                            System.Windows.Forms.MessageBox.Show(String.Concat(Program.Name, " v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019\r\nhttps://github.com/kgober/VT05"), String.Concat("About ", Program.Name));
+                            return true;
+                        case 0xf100: // System Menu
+                            //return true; // prevent System Menu opening to prevent losing track of Alt and Space status 
+                        default:
+                            return false;
+                    }
+                }
+                else
+                {
+                    return false;
                 }
             }
 

@@ -26,7 +26,7 @@ using System.Threading;
 
 namespace Emulator
 {
-    // IO - connect emulated VT05 UART to the outside world
+    // IO - connect emulated terminal UART to the outside world
 
     // Future Improvements / To Do
     // don't read bytes from telnet unless ready to display (allows AO to work)

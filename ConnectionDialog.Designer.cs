@@ -291,8 +291,9 @@ namespace Emulator
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.button2);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "ConnectionDialog";
-            this.Text = "VT05 Connection";
+            this.Text = "Connection";
             this.Load += new System.EventHandler(this.ConnectionDialog_Load);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();

@@ -44,6 +44,7 @@ namespace Emulator
             this.radioButton14 = new System.Windows.Forms.RadioButton();
             this.radioButton15 = new System.Windows.Forms.RadioButton();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
@@ -53,7 +54,6 @@ namespace Emulator
             this.radioButton12 = new System.Windows.Forms.RadioButton();
             this.radioButton13 = new System.Windows.Forms.RadioButton();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -239,6 +239,18 @@ namespace Emulator
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Emulator Options";
             // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Checked = true;
+            this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox4.Location = new System.Drawing.Point(6, 42);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(78, 17);
+            this.checkBox4.TabIndex = 8;
+            this.checkBox4.Text = "Margin Bell";
+            this.checkBox4.UseVisualStyleBackColor = true;
+            // 
             // checkBox3
             // 
             this.checkBox3.AutoSize = true;
@@ -336,18 +348,6 @@ namespace Emulator
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Keyboard";
             // 
-            // checkBox4
-            // 
-            this.checkBox4.AutoSize = true;
-            this.checkBox4.Checked = true;
-            this.checkBox4.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox4.Location = new System.Drawing.Point(6, 42);
-            this.checkBox4.Name = "checkBox4";
-            this.checkBox4.Size = new System.Drawing.Size(78, 17);
-            this.checkBox4.TabIndex = 8;
-            this.checkBox4.Text = "Margin Bell";
-            this.checkBox4.UseVisualStyleBackColor = true;
-            // 
             // SettingsDialog
             // 
             this.AcceptButton = this.button1;
@@ -362,8 +362,9 @@ namespace Emulator
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "SettingsDialog";
-            this.Text = "VT05 Settings";
+            this.Text = "Settings";
             this.Load += new System.EventHandler(this.SettingsDialog_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
