@@ -61,3 +61,6 @@ using System.Runtime.InteropServices;
 // 1.0.0.5 - don't close connection if it's not actually changing
 //         - add GitHub URL to About dialog
 // 1.0.0.6 - allow paste from clipboard (mouse right click)
+//         - move VT05-specific code to VT05.cs
+//         - improve handling of serial port exceptions
+//         - fix hardcoded telnet terminal type/speed/size
