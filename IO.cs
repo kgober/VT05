@@ -219,7 +219,8 @@ namespace Emulator
 
             public override String ConnectionString
             {
-                get {
+                get
+                {
                     String s = "";
                     switch (mPort.StopBits)
                     {

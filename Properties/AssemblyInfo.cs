@@ -50,8 +50,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.6")]
-[assembly: AssemblyFileVersion("1.0.0.6")]
+[assembly: AssemblyVersion("1.0.0.7")]
+[assembly: AssemblyFileVersion("1.0.0.7")]
 // 1.0.0.0 - initial release (based on VT52 1.0.0.4)
 // 1.0.0.1 - improve screen color to more closely match P4 phosphor color
 // 1.0.0.2 - more accurate reproduction of terminal beep
@@ -64,3 +64,4 @@ using System.Runtime.InteropServices;
 //         - move VT05-specific code to VT05.cs
 //         - improve handling of serial port exceptions
 //         - fix hardcoded telnet terminal type/speed/size
+// 1.0.0.7 - allow aspect ratio to be locked/unlocked (default locked)

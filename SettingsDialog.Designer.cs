@@ -54,6 +54,7 @@ namespace Emulator
             this.radioButton12 = new System.Windows.Forms.RadioButton();
             this.radioButton13 = new System.Windows.Forms.RadioButton();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -230,11 +231,12 @@ namespace Emulator
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.checkBox5);
             this.groupBox4.Controls.Add(this.checkBox4);
             this.groupBox4.Controls.Add(this.checkBox3);
             this.groupBox4.Location = new System.Drawing.Point(136, 228);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(118, 65);
+            this.groupBox4.Size = new System.Drawing.Size(118, 88);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Emulator Options";
@@ -348,6 +350,16 @@ namespace Emulator
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Keyboard";
             // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Location = new System.Drawing.Point(6, 65);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(97, 17);
+            this.checkBox5.TabIndex = 9;
+            this.checkBox5.Text = "Stretch Display";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            // 
             // SettingsDialog
             // 
             this.AcceptButton = this.button1;
@@ -408,5 +420,6 @@ namespace Emulator
         private System.Windows.Forms.RadioButton radioButton14;
         private System.Windows.Forms.CheckBox checkBox3;
         private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.CheckBox checkBox5;
     }
 }

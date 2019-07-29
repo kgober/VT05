@@ -127,6 +127,12 @@ namespace Emulator
             set { checkBox4.Checked = value; }
         }
 
+        public Boolean OptStretchDisplay
+        {
+            get { return checkBox5.Checked; }
+            set { checkBox5.Checked = value; }
+        }
+
         private void SettingsDialog_Load(object sender, EventArgs e)
         {
             mOK = false;
