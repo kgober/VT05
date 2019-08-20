@@ -50,8 +50,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.7")]
-[assembly: AssemblyFileVersion("1.0.0.7")]
+[assembly: AssemblyVersion("1.0.0.8")]
+[assembly: AssemblyFileVersion("1.0.0.8")]
 // 1.0.0.0 - initial release (based on VT52 1.0.0.4)
 // 1.0.0.1 - improve screen color to more closely match P4 phosphor color
 // 1.0.0.2 - more accurate reproduction of terminal beep
@@ -65,3 +65,4 @@ using System.Runtime.InteropServices;
 //         - improve handling of serial port exceptions
 //         - fix hardcoded telnet terminal type/speed/size
 // 1.0.0.7 - allow aspect ratio to be locked/unlocked (default locked)
+// 1.0.0.8 - add -ob option to set/clear Backspace = DEL (default set)

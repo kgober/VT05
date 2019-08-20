@@ -116,6 +116,20 @@ namespace Emulator
                                             dlgSettings.OptHalfASCII = false;
                                             arg = arg.Substring(2);
                                         }
+                                        else if (arg.StartsWith("b+", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            mOptBackspaceIsDEL = true;
+                                            if (dlgSettings == null) dlgSettings = new SettingsDialog();
+                                            dlgSettings.OptBackspaceSendsDEL = true;
+                                            arg = arg.Substring(2);
+                                        }
+                                        else if (arg.StartsWith("b-", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            mOptBackspaceIsDEL = false;
+                                            if (dlgSettings == null) dlgSettings = new SettingsDialog();
+                                            dlgSettings.OptBackspaceSendsDEL = false;
+                                            arg = arg.Substring(2);
+                                        }
                                         else if (arg.StartsWith("m+", StringComparison.OrdinalIgnoreCase))
                                         {
                                             mOptMarginBell = true;
@@ -239,6 +253,7 @@ namespace Emulator
             {
                 mKeys = new List<VK>();
                 mCaps = Console.CapsLock;
+                mOptBackspaceIsDEL = true;
                 mOptMarginBell = true;
             }
 

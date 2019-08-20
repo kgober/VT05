@@ -112,7 +112,7 @@ namespace Emulator
         public Boolean OptBackspaceSendsDEL
         {
             get { return checkBox2.Checked; }
-            set { checkBox3.Checked = value; }
+            set { checkBox2.Checked = value; }
         }
 
         public Boolean OptAutoRepeat

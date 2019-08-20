@@ -44,6 +44,7 @@ namespace Emulator
             this.radioButton14 = new System.Windows.Forms.RadioButton();
             this.radioButton15 = new System.Windows.Forms.RadioButton();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
@@ -54,7 +55,6 @@ namespace Emulator
             this.radioButton12 = new System.Windows.Forms.RadioButton();
             this.radioButton13 = new System.Windows.Forms.RadioButton();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -241,6 +241,16 @@ namespace Emulator
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Emulator Options";
             // 
+            // checkBox5
+            // 
+            this.checkBox5.AutoSize = true;
+            this.checkBox5.Location = new System.Drawing.Point(6, 65);
+            this.checkBox5.Name = "checkBox5";
+            this.checkBox5.Size = new System.Drawing.Size(97, 17);
+            this.checkBox5.TabIndex = 9;
+            this.checkBox5.Text = "Stretch Display";
+            this.checkBox5.UseVisualStyleBackColor = true;
+            // 
             // checkBox4
             // 
             this.checkBox4.AutoSize = true;
@@ -266,6 +276,8 @@ namespace Emulator
             // checkBox2
             // 
             this.checkBox2.AutoSize = true;
+            this.checkBox2.Checked = true;
+            this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox2.Location = new System.Drawing.Point(6, 42);
             this.checkBox2.Name = "checkBox2";
             this.checkBox2.Size = new System.Drawing.Size(113, 17);
@@ -349,16 +361,6 @@ namespace Emulator
             this.groupBox5.TabIndex = 7;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Keyboard";
-            // 
-            // checkBox5
-            // 
-            this.checkBox5.AutoSize = true;
-            this.checkBox5.Location = new System.Drawing.Point(6, 65);
-            this.checkBox5.Name = "checkBox5";
-            this.checkBox5.Size = new System.Drawing.Size(97, 17);
-            this.checkBox5.TabIndex = 9;
-            this.checkBox5.Text = "Stretch Display";
-            this.checkBox5.UseVisualStyleBackColor = true;
             // 
             // SettingsDialog
             // 
