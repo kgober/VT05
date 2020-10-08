@@ -1,5 +1,5 @@
 // IO.cs
-// Copyright (c) 2016, 2017, 2019 Kenneth Gober
+// Copyright (c) 2016, 2017, 2019, 2020 Kenneth Gober
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -298,7 +298,7 @@ namespace Emulator
             private Emulator.Telnet mTelnet;
             private Boolean mBreak;
 
-            public Telnet(String options, Int32 receiveBaud, Int32 transmitBaud, UInt16 termWidth, UInt16 termHeight, params String[] termTypes)
+            public Telnet(String options, Boolean retry, Int32 receiveBaud, Int32 transmitBaud, UInt16 termWidth, UInt16 termHeight, params String[] termTypes)
             {
                 mOptions = options;
                 String[] O = options.Split('|');
@@ -308,7 +308,7 @@ namespace Emulator
                 mTelnet.SetTerminalSpeed(receiveBaud, transmitBaud);
                 mTelnet.SetWindowSize(termWidth, termHeight);
                 mTelnet.SetTerminalType(termTypes);
-                mTelnet.Connect(mDestination);
+                mTelnet.Connect(mDestination, retry);
                 mTelnet.Receive += Receive;
             }
 
@@ -407,13 +407,13 @@ namespace Emulator
             private String mConnStr;
             private Emulator.RawTCP mRawTCP;
 
-            public RawTCP(String options)
+            public RawTCP(String options, Boolean retry)
             {
                 mOptions = options;
                 String[] O = options.Split('|');
                 mDestination = O[0];
                 mConnStr = String.Concat("TCP ", mDestination);
-                mRawTCP = new Emulator.RawTCP(mDestination);
+                mRawTCP = new Emulator.RawTCP(mDestination, retry);
                 mRawTCP.Receive += Receive;
             }
 

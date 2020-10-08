@@ -1,5 +1,5 @@
 ﻿// AssemblyInfo.cs
-// Copyright (c) 2016, 2017, 2019 Kenneth Gober
+// Copyright (c) 2016, 2017, 2020 Kenneth Gober
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Kenneth Gober")]
 [assembly: AssemblyProduct("VT05")]
-[assembly: AssemblyCopyright("Copyright © Kenneth Gober 2016, 2017, 2019")]
+[assembly: AssemblyCopyright("Copyright © Kenneth Gober 2016, 2017, 2019, 2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -50,8 +50,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.8")]
-[assembly: AssemblyFileVersion("1.0.0.8")]
+[assembly: AssemblyVersion("1.0.0.9")]
+[assembly: AssemblyFileVersion("1.0.0.9")]
 // 1.0.0.0 - initial release (based on VT52 1.0.0.4)
 // 1.0.0.1 - improve screen color to more closely match P4 phosphor color
 // 1.0.0.2 - more accurate reproduction of terminal beep
@@ -66,3 +66,5 @@ using System.Runtime.InteropServices;
 //         - fix hardcoded telnet terminal type/speed/size
 // 1.0.0.7 - allow aspect ratio to be locked/unlocked (default locked)
 // 1.0.0.8 - add -ob option to set/clear Backspace = DEL (default set)
+// 1.0.0.9 - improve handling of local echo (Half Duplex)
+//         - change -R and -T options to retry until connected

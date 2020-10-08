@@ -1,5 +1,5 @@
 // Telnet.cs
-// Copyright (c) 2016, 2017, 2019 Kenneth Gober
+// Copyright (c) 2016, 2017, 2019, 2020 Kenneth Gober
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Net.Sockets;
 
 namespace Emulator
@@ -110,14 +111,14 @@ namespace Emulator
         {
         }
 
-        public Telnet(String destination)
+        public Telnet(String destination, Boolean retry)
         {
-            Connect(destination);
+            Connect(destination, retry);
         }
 
-        public Telnet(String host, Int32 port)
+        public Telnet(String host, Int32 port, Boolean retry)
         {
-            Connect(host, port);
+            Connect(host, port, retry);
         }
 
         public Boolean AutoFlush
@@ -157,7 +158,7 @@ namespace Emulator
             }
         }
 
-        public void Connect(String destination)
+        public void Connect(String destination, Boolean retry)
         {
             String host = destination;
             Int32 port = 23;
@@ -167,13 +168,24 @@ namespace Emulator
                 port = Int32.Parse(destination.Substring(p + 1));
                 host = destination.Substring(0, p);
             }
-            Connect(host, port);
+            Connect(host, port, retry);
         }
 
-        public void Connect(String host, Int32 port)
+        public void Connect(String host, Int32 port, Boolean retry)
         {
             if (mTcpClient != null) throw new InvalidOperationException("Already connected");
-            mTcpClient = new TcpClient(host, port);
+            do
+            {
+                try
+                {
+                    mTcpClient = new TcpClient(host, port);
+                    retry = false;
+                }
+                catch (SocketException ex)
+                {
+                    Thread.Sleep(200);
+                }
+            } while (retry);
             mSocket = new TelnetSocket(mTcpClient.Client);
             mSocket.Receive += new TelnetSocket.ReceiveEventHandler(TelnetSocket_Receive);
             Init();

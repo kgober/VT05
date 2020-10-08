@@ -1,5 +1,5 @@
 // RawTCP.cs
-// Copyright (c) 2017, 2019 Kenneth Gober
+// Copyright (c) 2017, 2019, 2020 Kenneth Gober
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -46,14 +46,14 @@ namespace Emulator
         {
         }
 
-        public RawTCP(String destination)
+        public RawTCP(String destination, Boolean retry)
         {
-            Connect(destination);
+            Connect(destination, retry);
         }
 
-        public RawTCP(String host, Int32 port)
+        public RawTCP(String host, Int32 port, Boolean retry)
         {
-            Connect(host, port);
+            Connect(host, port, retry);
         }
 
         public Boolean AutoFlush
@@ -67,7 +67,7 @@ namespace Emulator
             get { return (mRecvQueue.Count != 0); }
         }
 
-        public void Connect(String destination)
+        public void Connect(String destination, Boolean retry)
         {
             String host = destination;
             Int32 port = -1;
@@ -78,13 +78,24 @@ namespace Emulator
                 host = destination.Substring(0, p);
             }
             if (p == -1) throw new ArgumentException("destination");
-            Connect(host, port);
+            Connect(host, port, retry);
         }
 
-        public void Connect(String host, Int32 port)
+        public void Connect(String host, Int32 port, Boolean retry)
         {
             if (mTcpClient != null) throw new InvalidOperationException("Already connected");
-            mTcpClient = new TcpClient(host, port);
+            do
+            {
+                try
+                {
+                    mTcpClient = new TcpClient(host, port);
+                    retry = false;
+                }
+                catch (SocketException ex)
+                {
+                    Thread.Sleep(200);
+                }
+            } while (retry);
             mSocket = mTcpClient.Client;
             Start();
         }

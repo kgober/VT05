@@ -1,5 +1,5 @@
 // VT05.cs
-// Copyright (c) 2016, 2017, 2019 Kenneth Gober
+// Copyright (c) 2016, 2017, 2019, 2020 Kenneth Gober
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -164,19 +164,21 @@ namespace Emulator
                                     break;
                                 case 'r':
                                 case 'R':
+                                    c = arg[1];
                                     arg = arg.Substring(2);
                                     if ((arg.Length == 0) && (ap < args.Length)) arg = args[ap++];
                                     if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                                     dlgConnection.Set(typeof(IO.RawTCP), arg);
-                                    mUART.IO = ConnectRawTCP(dlgConnection.Options);
+                                    mUART.IO = ConnectRawTCP(dlgConnection.Options, (c < '`'));
                                     break;
                                 case 't':
                                 case 'T':
+                                    c = arg[1];
                                     arg = arg.Substring(2);
                                     if ((arg.Length == 0) && (ap < args.Length)) arg = args[ap++];
                                     if (dlgConnection == null) dlgConnection = new ConnectionDialog();
                                     dlgConnection.Set(typeof(IO.Telnet), arg);
-                                    mUART.IO = ConnectTelnet(dlgConnection.Options);
+                                    mUART.IO = ConnectTelnet(dlgConnection.Options, (c < '`'));
                                     break;
                             }
                         }
@@ -241,7 +243,6 @@ namespace Emulator
             private Boolean mAlt;                   // Alt is pressed
             private Boolean mCaps;                  // Caps Lock is enabled
             private Boolean mOptAutoRepeat;         // enable automatic key repeat
-            private Boolean mOptHalfDuplex;         // transmitter is wired directly to receiver
             private Boolean mOptHalfASCII;          // keyboard sends 96 characters rather than 128
             private Boolean mOptBackspaceIsDEL;     // Backspace key sends DEL rather than BS
             private Boolean mOptMarginBell;         // margin bell enabled
@@ -294,7 +295,7 @@ namespace Emulator
                             return true;
                         case 99: // About
                             String v = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                            System.Windows.Forms.MessageBox.Show(String.Concat(Program.Name, " v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019\r\nhttps://github.com/kgober/VT05"), String.Concat("About ", Program.Name));
+                            System.Windows.Forms.MessageBox.Show(String.Concat(Program.Name, " v", v, "\r\nCopyright © Kenneth Gober 2016, 2017, 2019, 2020\r\nhttps://github.com/kgober/VT05"), String.Concat("About ", Program.Name));
                             return true;
                         case 0xf100: // System Menu
                             //return true; // prevent System Menu opening to prevent losing track of Alt and Space status 
@@ -616,7 +617,6 @@ namespace Emulator
 
                 mOptAutoRepeat = dlgSettings.OptAutoRepeat;
                 mOptMarginBell = dlgSettings.OptMarginBell;
-                mOptHalfDuplex = dlgSettings.OptHalfDuplex;
                 mOptHalfASCII = dlgSettings.OptHalfASCII;
                 mOptBackspaceIsDEL = dlgSettings.OptBackspaceSendsDEL;
                 if (dlgSettings.OptStretchDisplay != mOptStretchDisplay)
@@ -631,6 +631,7 @@ namespace Emulator
                 if (r == -1) return;
                 SetTransmitSpeed(t);
                 SetReceiveSpeed(r);
+                SetLocalEcho(dlgSettings.OptHalfDuplex);
                 SetTransmitParity(dlgSettings.Parity);
             }
 
@@ -701,10 +702,15 @@ namespace Emulator
 
             private IO ConnectTelnet(String options)
             {
+                return ConnectTelnet(options, false);
+            }
+
+            private IO ConnectTelnet(String options, Boolean retry)
+            {
                 if ((mUART.IO is IO.Telnet) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
                 try
                 {
-                    IO.Telnet X = new IO.Telnet(options, mUART.ReceiveSpeed, mUART.TransmitSpeed, Display.COLS, Display.ROWS, "DEC-VT05", "VT05");
+                    IO.Telnet X = new IO.Telnet(options, retry, mUART.ReceiveSpeed, mUART.TransmitSpeed, Display.COLS, Display.ROWS, "DEC-VT05", "VT05");
                     String s = String.Concat(Program.Name, " - ", X.ConnectionString);
                     if (String.Compare(s, mCaption) != 0)
                     {
@@ -722,10 +728,15 @@ namespace Emulator
 
             private IO ConnectRawTCP(String options)
             {
+                return ConnectRawTCP(options, false);
+            }
+
+            private IO ConnectRawTCP(String options, Boolean retry)
+            {
                 if ((mUART.IO is IO.RawTCP) && (String.Compare(mUART.IO.Options, options) == 0)) return mUART.IO;
                 try
                 {
-                    IO.RawTCP X = new IO.RawTCP(options);
+                    IO.RawTCP X = new IO.RawTCP(options, retry);
                     String s = String.Concat(Program.Name, " - ", X.ConnectionString);
                     if (String.Compare(s, mCaption) != 0)
                     {
@@ -1829,6 +1840,11 @@ namespace Emulator
                 mUART.SetTransmitParity(parity);
             }
 
+            private void SetLocalEcho(Boolean enabled)
+            {
+                mUART.SetLocalEcho(enabled);
+            }
+
             private void Send(Byte data)
             {
                 mUART.Send(data);
@@ -1855,6 +1871,7 @@ namespace Emulator
                 private Int32 mRecvCount;       // bytes received since clock
                 private Boolean mRecvBreak;     // receive break state
                 private System.IO.Ports.Parity mParity;
+                private Boolean mLocalEcho;     // UART loopback
                 private IO mIO;                 // I/O interface
 
                 public UART(VT05 parent)
@@ -2041,6 +2058,11 @@ namespace Emulator
                     mParity = parity;
                 }
 
+                public void SetLocalEcho(Boolean enabled)
+                {
+                    mLocalEcho = enabled;
+                }
+
                 private Int32 NybbleParity(Int32 data)
                 {
                     switch (data & 0x0F)
@@ -2095,7 +2117,7 @@ namespace Emulator
                         }
                         if ((!mSendBusy) && (!mIO.DelaySend)) mIO.Send(data);
                         else mSendQueue.Enqueue(data);
-                        if (mVT05.mOptHalfDuplex && !(mIO is IO.Loopback)) IOEvent(this, new IOEventArgs(IOEventType.Data, data));
+                        if (mLocalEcho && !(mIO is IO.Loopback)) IOEvent(this, new IOEventArgs(IOEventType.Data, data));
                         if (!mSendBusy)
                         {
                             mSendBusy = true;
