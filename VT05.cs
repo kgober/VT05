@@ -1883,7 +1883,7 @@ namespace Emulator
                     mRecvQueue = new Queue<Byte>();
                     mRecvTimer = new Timer(RecvTimer_Callback, this, Timeout.Infinite, Timeout.Infinite);
                     SetReceiveSpeed(300);
-                    SetTransmitParity(System.IO.Ports.Parity.Space);
+                    SetTransmitParity(System.IO.Ports.Parity.Mark);
                 }
 
                 public IO IO

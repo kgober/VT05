@@ -50,8 +50,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.9")]
-[assembly: AssemblyFileVersion("1.0.0.9")]
+[assembly: AssemblyVersion("1.0.0.10")]
+[assembly: AssemblyFileVersion("1.0.0.10")]
 // 1.0.0.0 - initial release (based on VT52 1.0.0.4)
 // 1.0.0.1 - improve screen color to more closely match P4 phosphor color
 // 1.0.0.2 - more accurate reproduction of terminal beep
@@ -68,3 +68,4 @@ using System.Runtime.InteropServices;
 // 1.0.0.8 - add -ob option to set/clear Backspace = DEL (default set)
 // 1.0.0.9 - improve handling of local echo (Half Duplex)
 //         - change -R and -T options to retry until connected
+// 1.0.0.10 - fix UART parity setting at startup
